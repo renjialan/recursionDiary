@@ -1,45 +1,41 @@
-'use server'
+'use server';
 
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { createClient } from '@/utils/supabase/server';
+import { revalidatePath } from 'next/cache';
 
-import { createClient } from '@/utils/supabase/server'
+export async function login(prevState: any, formData: FormData) {
+  const supabase = await createClient();
 
-export async function login(formData: FormData): Promise<void> {
-  const supabase = createClient();
-
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  };
-
-  const { error } = await (await supabase).auth.signInWithPassword(data);
-
-  if (error) {
-    console.error('Login error:', error.message);
-    throw new Error(error.message);
+  // Check project availability
+  const { data: health } = await supabase.rpc('health');
+  if (health?.status !== 'OK') {
+    return {
+      error: 'Authentication service unavailable. Please try again later.',
+      success: false
+    };
   }
 
-  revalidatePath('/', 'layout');
-  redirect('/');
-}
+  const email = formData.get('email')?.toString();
+  const password = formData.get('password')?.toString();
 
-export async function signup(formData: FormData) {
-  const supabase = await createClient()
-
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  if (!email || !password) {
+    return { error: 'All fields are required', success: false };
   }
 
-  const { error } = await supabase.auth.signUp(data)
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) {
-    redirect('/error')
+    if (error?.message.includes('invalid login credentials')) {
+      return { error: 'Invalid email or password', success: false };
+    }
+
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Login error:', error);
+    return {
+      error: 'Connection to authentication server failed',
+      success: false
+    };
   }
-
-  revalidatePath('/', 'layout')
-  redirect('/')
 }
