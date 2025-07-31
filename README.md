@@ -1,29 +1,28 @@
-# Success Diary - AI-Powered Personal Journal
+# Success Diary
 
-A Notion-like personal diary application with AI-powered insights and memory system. Built with React, TypeScript, Tailwind CSS, and OpenAI integration.
+A minimalistic, AI-powered daily journaling app inspired by Notion and Airbnb design. Track your thoughts, goals, and progress with intelligent insights, secure Google authentication, and cross-device sync.
 
 ## Features
 
-### Core Functionality
-- **Document Management**: Create, edit, save, and organize diary entries
-- **Rich Text Editor**: Clean, distraction-free writing experience
-- **Document Navigation**: Easy switching between entries with sidebar
-- **Local Storage**: Automatic saving to browser storage
-- **Cloud Sync**: Optional Supabase integration for cross-device access
+### ✨ Core Experience
+- **Daily Journaling**: Rich text editor with minimalistic, distraction-free design
+- **Template System**: Pre-built templates (Success Diary, Founder's Log, Couples Journal) with Airbnb-style card selection
+- **Google Authentication**: Secure sign-in with Google OAuth through Supabase
+- **Cross-device Sync**: Your entries sync seamlessly across all your devices
+- **Interactive Fish Tank**: Relaxing emoji aquarium with touch interactions and bubble effects
 
-### AI-Powered Insights
-- **Smart Analysis**: AI analyzes your diary entries and provides personalized insights
+### 🤖 AI-Powered Insights
+- **GPT-4 Analysis**: AI analyzes your diary entries and provides personalized insights
+- **Memory Context**: AI remembers your past entries and references them in conversations
 - **Multi-turn Conversations**: Ask follow-up questions and have natural conversations
-- **Actionable Advice**: Get specific, practical recommendations
-- **Emotional Intelligence**: AI recognizes patterns in your emotions and experiences
-- **Export & Share**: Download insights as JSON or text files
+- **Pattern Recognition**: Identifies recurring themes, goals, and personal growth areas
+- **Independent Scrolling**: AI insights panel scrolls independently for better UX
 
-### 🧠 Memory System & RAG (Retrieval Augmented Generation)
-- **Personal Memory**: AI remembers your past entries and references them in conversations
-- **Semantic Search**: Uses vector embeddings to find relevant past experiences
-- **Contextual Responses**: AI provides insights that build on your personal history
-- **Pattern Recognition**: Identifies recurring themes, goals, and challenges
-- **Smart Reminders**: References past commitments and encourages follow-through
+### 🔒 Privacy & Security
+- **Row-Level Security**: Your data is protected by Supabase RLS policies
+- **Local Storage Fallback**: Works offline with automatic local storage backup
+- **Input Sanitization**: XSS protection for all user inputs
+- **No Tracking**: Privacy-first approach with no analytics or tracking
 
 #### How Memory Works
 1. **Automatic Storage**: Every diary entry is automatically stored as a memory with semantic embeddings
@@ -38,19 +37,19 @@ A Notion-like personal diary application with AI-powered insights and memory sys
 - **Local Storage**: Memories work offline with local storage fallback
 - **Privacy-First**: All memories are stored locally by default
 
-## Setup
+## Quick Start
 
 ### Prerequisites
-- Node.js 16+ 
+- Node.js 18+ 
 - npm or yarn
-- OpenAI API key (for AI insights)
-- Supabase account (optional, for cloud sync)
+- Supabase account
+- OpenAI API key
 
-### Installation
+### Local Development
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone <your-repo-url>
    cd success-diary
    ```
 
@@ -59,34 +58,102 @@ A Notion-like personal diary application with AI-powered insights and memory sys
    npm install
    ```
 
-3. **Environment Setup**
-   Create a `.env.local` file in the root directory:
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Fill in your `.env` file:
    ```env
-   VITE_OPENAI_API_KEY=your_openai_api_key_here
-   VITE_SUPABASE_URL=your_supabase_url_here
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   VITE_OPENAI_API_KEY=your_openai_api_key
    ```
 
-4. **Database Setup (Optional)**
-   If using Supabase for cloud sync:
+4. **Set up Supabase database**
    
-   a. Run the main setup script:
+   Run this SQL in your Supabase SQL editor:
    ```sql
-   -- Copy and run the contents of supabase-setup.sql in your Supabase SQL editor
-   ```
-   
-   b. Run the memory system setup:
-   ```sql
-   -- Copy and run the contents of supabase-memory-setup.sql in your Supabase SQL editor
+   -- Create memories table for AI context
+   CREATE TABLE IF NOT EXISTS memories (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     user_id TEXT NOT NULL,
+     content TEXT NOT NULL,
+     embedding VECTOR(1536),
+     metadata JSONB DEFAULT '{}',
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+   );
+
+   -- Enable RLS
+   ALTER TABLE memories ENABLE ROW LEVEL SECURITY;
+
+   -- Create RLS policy
+   CREATE POLICY "Users can manage their own memories" ON memories
+     FOR ALL USING (auth.uid()::text = user_id);
    ```
 
-5. **Start the development server**
+5. **Configure Google OAuth in Supabase**
+   - Go to Authentication > Providers in your Supabase dashboard
+   - Enable Google provider
+   - Add your domain to authorized redirect URLs:
+     - For local: `http://localhost:3000`
+     - For production: `https://your-vercel-domain.vercel.app`
+
+6. **Start development server**
    ```bash
    npm run dev
    ```
 
-6. **Open your browser**
-   Navigate to `http://localhost:3000`
+## Deployment to Vercel
+
+### 1. Prepare Your Repository
+
+1. **Push to GitHub**
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
+
+### 2. Deploy to Vercel
+
+1. **Connect Repository**
+   - Go to [vercel.com](https://vercel.com)
+   - Click "New Project"
+   - Import your GitHub repository
+
+2. **Configure Environment Variables**
+   
+   In Vercel dashboard, add these environment variables:
+   ```
+   VITE_SUPABASE_URL → your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY → your_supabase_anon_key  
+   VITE_OPENAI_API_KEY → your_openai_api_key
+   ```
+
+3. **Update Google OAuth Settings**
+   - In Supabase dashboard, go to Authentication > Providers
+   - Update Google OAuth redirect URLs to include:
+     ```
+     https://your-app-name.vercel.app
+     ```
+
+4. **Deploy**
+   - Click "Deploy" in Vercel
+   - Your app will be live at `https://your-app-name.vercel.app`
+
+### 3. Post-Deployment
+
+1. **Test Authentication**
+   - Visit your deployed app
+   - Try Google sign-in
+   - Create a test journal entry
+   - Generate AI insights
+
+2. **Monitor Performance**
+   - Check Vercel analytics
+   - Monitor Supabase usage
+   - Watch OpenAI API costs
 
 ## Usage
 
@@ -116,26 +183,34 @@ A Notion-like personal diary application with AI-powered insights and memory sys
 - **Goal Setting**: Mention goals and the AI will help track your progress
 - **Challenges**: Share struggles and the AI will reference similar past experiences
 
-## Technical Architecture
+## Tech Stack
 
-### Frontend
-- **React 18** with TypeScript
-- **Tailwind CSS** for styling
-- **Vite** for fast development and building
-- **React Markdown** for rendering AI responses
-- **Date-fns** for date formatting
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Build Tool**: Vite with production optimizations
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **AI**: OpenAI GPT-4 with memory context
+- **Authentication**: Google OAuth via Supabase
+- **Deployment**: Vercel
+- **Styling**: Tailwind CSS with minimalistic design
 
-### AI Integration
-- **OpenAI GPT-3.5-turbo** for text generation
-- **OpenAI text-embedding-ada-002** for vector embeddings
-- **Direct API calls** for reliability and simplicity
-- **Memory system** for contextual responses
+## Environment Variables
 
-### Data Storage
-- **Local Storage**: Primary storage for documents and insights
-- **Supabase**: Optional cloud storage with PostgreSQL
-- **Vector Database**: pgvector extension for semantic search
-- **Memory System**: Automatic storage and retrieval of user experiences
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `VITE_SUPABASE_URL` | Your Supabase project URL | Yes |
+| `VITE_SUPABASE_ANON_KEY` | Your Supabase anonymous key | Yes |
+| `VITE_OPENAI_API_KEY` | OpenAI API key for AI insights | Yes |
+| `VITE_PINECONE_API_KEY` | Pinecone API key (optional) | No |
+| `VITE_PINECONE_ENVIRONMENT` | Pinecone environment (optional) | No |
+| `VITE_PINECONE_INDEX_NAME` | Pinecone index name (optional) | No |
+
+## Security
+
+- All API keys are client-side only and encrypted in transit
+- User data is protected by Supabase Row Level Security (RLS)
+- Google OAuth provides secure authentication
+- Input sanitization prevents XSS attacks
+- No sensitive data is logged or stored in plain text
 
 ### Memory System Architecture
 ```

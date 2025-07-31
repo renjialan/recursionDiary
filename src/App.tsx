@@ -148,28 +148,23 @@ const App: React.FC = () => {
     // Check if we already have insights for this document in local state
     const hasInsightsForDocument = insights.some(insight => insight.documentId === documentId);
     if (hasInsightsForDocument) {
-      console.log('App: Already have insights for document, skipping load');
       return;
     }
 
     // Always try local storage first
     const localInsights = loadInsightsFromLocal(documentId);
-    console.log('App: Loaded insights from local storage for document:', documentId, localInsights);
     
     if (localInsights.length > 0) {
       // If we have local insights, use them
       setInsights(localInsights);
-      console.log('App: Using local insights, skipping Supabase load');
       return;
     }
 
     // Only try Supabase if local storage is empty
     try {
       const documentInsights = await loadInsightsFromSupabase(documentId);
-      console.log('App: Loaded insights from Supabase for document:', documentId, documentInsights);
       setInsights(documentInsights);
     } catch (error) {
-      console.error('Failed to load insights from Supabase, using empty array:', error);
       setInsights([]);
     }
   };
@@ -178,12 +173,9 @@ const App: React.FC = () => {
     if (!userId) return;
     
     try {
-      console.log('App: Loading memory context...');
       const context = await getMemoryContext(content, userId, 3);
       setMemoryContext(context);
-      console.log('App: Memory context loaded:', context.summary);
     } catch (error) {
-      console.error('App: Failed to load memory context:', error);
       setMemoryContext(undefined);
     }
   };
@@ -205,7 +197,6 @@ const App: React.FC = () => {
     // Save current insights to local storage before switching
     if (currentDocument && insights.length > 0) {
       insights.forEach(insight => saveInsightToLocal(insight));
-      console.log('App: Saved insights to local storage before switching documents');
     }
     
     setCurrentDocument(document);
@@ -230,7 +221,6 @@ const App: React.FC = () => {
       );
       setCurrentDocument(document);
     } catch (error) {
-      console.error('Failed to save document:', error);
       // Continue with UI updates even if storage fails
       setDocuments(prev => 
         prev.map(doc => 
@@ -245,7 +235,7 @@ const App: React.FC = () => {
     try {
       deleteDocumentStorage(documentId);
     } catch (error) {
-      console.error('Failed to delete document from storage:', error);
+      // Silently handle storage errors
     }
     
     // Always update UI even if storage delete fails
@@ -260,7 +250,6 @@ const App: React.FC = () => {
 
   const handleGenerateInsight = async (request: InsightRequest) => {
     if (!currentDocument) {
-      console.error('No current document');
       return;
     }
 
@@ -292,7 +281,7 @@ const App: React.FC = () => {
       try {
         await saveInsightToSupabase(newInsight);
       } catch (error) {
-        console.error('Failed to save insight to Supabase:', error);
+        // Silently handle Supabase errors
       }
 
       // Always save to local storage as backup
@@ -302,7 +291,7 @@ const App: React.FC = () => {
         // Verify it was saved by loading it back
         const savedInsights = loadInsightsFromLocal(currentDocument.id);
       } catch (error) {
-        console.error('Failed to save insight to local storage:', error);
+        // Silently handle local storage errors
       }
 
       // Update local state - this is the key part
@@ -313,7 +302,6 @@ const App: React.FC = () => {
       setForceUpdate(prev => prev + 1);
       
     } catch (error) {
-      console.error('App: Failed to generate insight:', error);
       throw error; // Re-throw to show error in UI
     } finally {
       setIsLoadingInsights(false);
@@ -324,7 +312,7 @@ const App: React.FC = () => {
     try {
       await deleteInsightFromSupabase(insightId);
     } catch (error) {
-      console.error('Failed to delete insight from Supabase:', error);
+      // Silently handle Supabase errors
     }
 
     // Always delete from local storage
@@ -351,7 +339,6 @@ const App: React.FC = () => {
         try {
           await saveInsightToSupabase(insight);
         } catch (error) {
-          console.error('Failed to save insight to Supabase:', insight.id, error);
           // Continue with other insights even if one fails
         }
       }
@@ -359,24 +346,16 @@ const App: React.FC = () => {
       // Always save to local storage as backup
       insights.forEach(insight => saveInsightToLocal(insight));
       
-      console.log('Insights synced successfully');
     } catch (error) {
-      console.error('Failed to sync insights:', error);
       // Even if Supabase fails, ensure local storage is updated
       insights.forEach(insight => saveInsightToLocal(insight));
     }
   };
 
-  // Debug logging for insights state
-  React.useEffect(() => {
-    console.log('App: Insights state changed:', insights);
-  }, [insights]);
-
   // Auto-save insights to local storage whenever they change
   React.useEffect(() => {
     if (currentDocument && insights.length > 0) {
       insights.forEach(insight => saveInsightToLocal(insight));
-      console.log('App: Auto-saved insights to local storage');
     }
   }, [insights, currentDocument]);
 
