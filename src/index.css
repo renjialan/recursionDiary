@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .editor-content {
+    @apply prose prose-gray max-w-none;
+  }
+  
+  .editor-content h1 {
+    @apply text-3xl font-bold mb-4 text-gray-900;
+  }
+  
+  .editor-content h2 {
+    @apply text-2xl font-semibold mb-3 text-gray-800;
+  }
+  
+  .editor-content h3 {
+    @apply text-xl font-medium mb-2 text-gray-700;
+  }
+  
+  .editor-content p {
+    @apply mb-4 text-gray-700 leading-relaxed;
+  }
+  
+  .editor-content ul {
+    @apply mb-4 list-disc list-inside;
+  }
+  
+  .editor-content ol {
+    @apply mb-4 list-decimal list-inside;
+  }
+  
+  .editor-content li {
+    @apply mb-1;
+  }
+  
+  .editor-content blockquote {
+    @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 mb-4;
+  }
+  
+  .editor-content code {
+    @apply bg-gray-100 px-1 py-0.5 rounded text-sm font-mono;
+  }
+  
+  .editor-content pre {
+    @apply bg-gray-100 p-4 rounded-lg overflow-x-auto mb-4;
+  }
+  
+  .editor-content pre code {
+    @apply bg-transparent p-0;
+  }
+} 
