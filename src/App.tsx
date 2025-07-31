@@ -14,7 +14,7 @@ import {
   deleteInsight as deleteInsightFromLocal
 } from './utils/storage';
 import { generateInsight, generateEnhancedInsight } from './services/ai';
-import { saveInsightToSupabase, loadInsightsFromSupabase, deleteInsightFromSupabase, signInWithGoogle, signOut, supabase } from './services/supabase';
+import { saveInsightToSupabase, loadInsightsFromSupabase, deleteInsightFromSupabase, signInWithGoogle, signOut, handleAuthCallback, supabase } from './services/supabase';
 import { getMemoryContext } from './services/memory';
 import { MemoryContext } from './types';
 
@@ -45,6 +45,9 @@ const App: React.FC = () => {
   // Auth testing - check current user
   React.useEffect(() => {
     if (supabase) {
+      // Handle OAuth callback on page load
+      handleAuthCallback();
+      
       // Check current session
       supabase.auth.getSession().then(({ data: { session } }: any) => {
         setUser(session?.user ?? null);

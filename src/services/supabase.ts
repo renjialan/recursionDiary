@@ -33,6 +33,22 @@ export const signInWithGoogle = async () => {
   });
 };
 
+// Handle OAuth callback
+export const handleAuthCallback = async () => {
+  if (!supabase) return;
+  
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error('Auth callback error:', error);
+    }
+    return { data, error };
+  } catch (error) {
+    console.error('Error handling auth callback:', error);
+    return { error };
+  }
+};
+
 export const signOut = async () => {
   if (!supabase) return;
   return await supabase.auth.signOut();
