@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, MessageCircle, Plus, Trash2, RefreshCw, Sparkles, Download, Share2, Clock, History } from 'lucide-react';
+import { Brain, Trash2, RefreshCw, Sparkles, Download, Share2, Clock, History } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Insight, InsightRequest, MemoryContext } from '../types';
 import { format as formatDate } from 'date-fns';

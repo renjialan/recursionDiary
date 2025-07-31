@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Fish, Bubble } from '../types';
 import {
   TANK_CONFIG,
-  createFish,
   createBubble,
   updateFishPosition,
   updateBubblePosition,
@@ -20,7 +19,6 @@ const FishTank: React.FC = () => {
   
   const animationFrameRef = useRef<number>();
   const bubbleIntervalRef = useRef<NodeJS.Timeout>();
-  const fishCountRef = useRef(0);
   const bubbleCountRef = useRef(0);
 
   // Initialize fish when tank expands

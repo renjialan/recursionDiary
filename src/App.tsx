@@ -4,8 +4,6 @@ import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import InsightsPanel from './components/InsightsPanel';
 import FishTank from './components/FishTank';
-import LandingPage from './components/LandingPage';
-import PreviewBanner from './components/PreviewBanner';
 import { Document, Insight, InsightRequest, EnhancedInsightRequest } from './types';
 import { 
   loadDocuments, 
@@ -75,7 +73,7 @@ const App: React.FC = () => {
 
   // Close user menu when clicking outside
   React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (_event: MouseEvent) => {
       if (showUserMenu) {
         setShowUserMenu(false);
       }
@@ -289,7 +287,7 @@ const App: React.FC = () => {
         saveInsightToLocal(newInsight);
         
         // Verify it was saved by loading it back
-        const savedInsights = loadInsightsFromLocal(currentDocument.id);
+        loadInsightsFromLocal(currentDocument.id);
       } catch (error) {
         // Silently handle local storage errors
       }

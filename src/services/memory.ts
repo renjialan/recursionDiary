@@ -264,7 +264,7 @@ const generateContextSummary = (searchResults: MemorySearchResult[]): string => 
 };
 
 // Generate suggestions based on memories
-const generateSuggestions = (searchResults: MemorySearchResult[], currentContent: string): string[] => {
+const generateSuggestions = (searchResults: MemorySearchResult[], _currentContent: string): string[] => {
   const suggestions: string[] = [];
   
   // Look for recurring themes
