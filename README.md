@@ -1,309 +1,420 @@
 # Success Diary
 
-A minimalistic, AI-powered daily journaling app inspired by Notion and Airbnb design. Track your thoughts, goals, and progress with intelligent insights, secure Google authentication, and cross-device sync.
+A Notion-like diary application with AI-powered insights, built with React, TypeScript, and Supabase.
 
-## Features
+## 🚀 Features
 
-### ✨ Core Experience
-- **Daily Journaling**: Rich text editor with minimalistic, distraction-free design
-- **Template System**: Pre-built templates (Success Diary, Founder's Log, Couples Journal) with Airbnb-style card selection
-- **Google Authentication**: Secure sign-in with Google OAuth through Supabase
-- **Cross-device Sync**: Your entries sync seamlessly across all your devices
-- **Interactive Fish Tank**: Relaxing emoji aquarium with touch interactions and bubble effects
+- **Rich Text Editor**: Markdown-style formatting with real-time preview
+- **AI-Powered Insights**: Generate intelligent insights about your diary entries
+- **Document Management**: Create, edit, and organize your diary entries
+- **Google Authentication**: Secure login with Google OAuth
+- **Cross-Device Sync**: Data syncs across devices via Supabase
+- **Memory Context**: AI remembers your past entries for better insights
+- **Template System**: Pre-built templates for different types of entries
+- **Fish Tank Animation**: Delightful UI element with interactive animations
 
-### 🤖 AI-Powered Insights
-- **GPT-4 Analysis**: AI analyzes your diary entries and provides personalized insights
-- **Memory Context**: AI remembers your past entries and references them in conversations
-- **Multi-turn Conversations**: Ask follow-up questions and have natural conversations
-- **Pattern Recognition**: Identifies recurring themes, goals, and personal growth areas
-- **Independent Scrolling**: AI insights panel scrolls independently for better UX
+## 🏗️ Architecture Overview
 
-### 🔒 Privacy & Security
-- **Row-Level Security**: Your data is protected by Supabase RLS policies
-- **Local Storage Fallback**: Works offline with automatic local storage backup
-- **Input Sanitization**: XSS protection for all user inputs
-- **No Tracking**: Privacy-first approach with no analytics or tracking
-
-#### How Memory Works
-1. **Automatic Storage**: Every diary entry is automatically stored as a memory with semantic embeddings
-2. **Smart Retrieval**: When you write new entries, the AI searches for relevant past experiences
-3. **Contextual Insights**: AI responses include references like "You mentioned before that..." or "This reminds me of when you..."
-4. **Personal Growth Tracking**: The system helps you see patterns and progress over time
-
-#### Memory Features
-- **Vector Embeddings**: Uses OpenAI's text-embedding-ada-002 for semantic similarity
-- **Fallback Search**: Text-based search when embeddings aren't available
-- **Memory Context Display**: See what past experiences the AI is referencing
-- **Local Storage**: Memories work offline with local storage fallback
-- **Privacy-First**: All memories are stored locally by default
-
-## Quick Start
-
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- Supabase account
-- OpenAI API key
-
-### Local Development
-
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd success-diary
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Fill in your `.env` file:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_OPENAI_API_KEY=your_openai_api_key
-   ```
-
-4. **Set up Supabase database**
-   
-   Run this SQL in your Supabase SQL editor:
-   ```sql
-   -- Create memories table for AI context
-   CREATE TABLE IF NOT EXISTS memories (
-     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-     user_id TEXT NOT NULL,
-     content TEXT NOT NULL,
-     embedding VECTOR(1536),
-     metadata JSONB DEFAULT '{}',
-     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-   );
-
-   -- Enable RLS
-   ALTER TABLE memories ENABLE ROW LEVEL SECURITY;
-
-   -- Create RLS policy
-   CREATE POLICY "Users can manage their own memories" ON memories
-     FOR ALL USING (auth.uid()::text = user_id);
-   ```
-
-5. **Configure Google OAuth in Supabase**
-   - Go to Authentication > Providers in your Supabase dashboard
-   - Enable Google provider
-   - Add your domain to authorized redirect URLs:
-     - For local: `http://localhost:3000`
-     - For production: `https://your-vercel-domain.vercel.app`
-
-6. **Start development server**
-   ```bash
-   npm run dev
-   ```
-
-## Deployment to Vercel
-
-### 1. Prepare Your Repository
-
-1. **Push to GitHub**
-   ```bash
-   git add .
-   git commit -m "Ready for deployment"
-   git push origin main
-   ```
-
-### 2. Deploy to Vercel
-
-1. **Connect Repository**
-   - Go to [vercel.com](https://vercel.com)
-   - Click "New Project"
-   - Import your GitHub repository
-
-2. **Configure Environment Variables**
-   
-   In Vercel dashboard, add these environment variables:
-   ```
-   VITE_SUPABASE_URL → your_supabase_project_url
-   VITE_SUPABASE_ANON_KEY → your_supabase_anon_key  
-   VITE_OPENAI_API_KEY → your_openai_api_key
-   ```
-
-3. **Update Google OAuth Settings**
-   - In Supabase dashboard, go to Authentication > Providers
-   - Update Google OAuth redirect URLs to include:
-     ```
-     https://your-app-name.vercel.app
-     ```
-
-4. **Deploy**
-   - Click "Deploy" in Vercel
-   - Your app will be live at `https://your-app-name.vercel.app`
-
-### 3. Post-Deployment
-
-1. **Test Authentication**
-   - Visit your deployed app
-   - Try Google sign-in
-   - Create a test journal entry
-   - Generate AI insights
-
-2. **Monitor Performance**
-   - Check Vercel analytics
-   - Monitor Supabase usage
-   - Watch OpenAI API costs
-
-## Usage
-
-### Basic Diary Writing
-1. Click "New Document" to create a new diary entry
-2. Write your thoughts, experiences, or reflections
-3. The document auto-saves as you type
-4. Use the sidebar to navigate between entries
-
-### AI Insights
-1. Write a diary entry with some content
-2. Click the brain icon to open the AI Insights panel
-3. Click "Generate" to get AI analysis of your entry
-4. Ask follow-up questions in the chat interface
-5. Export or share insights as needed
-
-### Memory System
-1. **Automatic**: The memory system works automatically - just write diary entries
-2. **Memory Context**: When you generate insights, the AI will reference relevant past entries
-3. **Pattern Recognition**: Look for recurring themes and patterns in your insights
-4. **Personal Growth**: Use the memory system to track progress on goals and commitments
-
-### Tips for Better AI Insights
-- **Be Specific**: Include details about your experiences, emotions, and thoughts
-- **Ask Questions**: Use the follow-up chat to dive deeper into specific areas
-- **Regular Writing**: The more you write, the better the AI understands your patterns
-- **Goal Setting**: Mention goals and the AI will help track your progress
-- **Challenges**: Share struggles and the AI will reference similar past experiences
-
-## Tech Stack
-
-- **Frontend**: React 18, TypeScript, Tailwind CSS
-- **Build Tool**: Vite with production optimizations
-- **Backend**: Supabase (PostgreSQL, Auth, Storage)
-- **AI**: OpenAI GPT-4 with memory context
-- **Authentication**: Google OAuth via Supabase
+### Tech Stack
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: Tailwind CSS
+- **Authentication**: Supabase Auth (Google OAuth)
+- **Database**: Supabase (PostgreSQL)
+- **AI Services**: OpenAI GPT-4
+- **Memory/Vector DB**: Pinecone
 - **Deployment**: Vercel
-- **Styling**: Tailwind CSS with minimalistic design
-
-## Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `VITE_SUPABASE_URL` | Your Supabase project URL | Yes |
-| `VITE_SUPABASE_ANON_KEY` | Your Supabase anonymous key | Yes |
-| `VITE_OPENAI_API_KEY` | OpenAI API key for AI insights | Yes |
-| `VITE_PINECONE_API_KEY` | Pinecone API key (optional) | No |
-| `VITE_PINECONE_ENVIRONMENT` | Pinecone environment (optional) | No |
-| `VITE_PINECONE_INDEX_NAME` | Pinecone index name (optional) | No |
-
-## Security
-
-- All API keys are client-side only and encrypted in transit
-- User data is protected by Supabase Row Level Security (RLS)
-- Google OAuth provides secure authentication
-- Input sanitization prevents XSS attacks
-- No sensitive data is logged or stored in plain text
-
-### Memory System Architecture
-```
-User writes diary entry
-    ↓
-Extract key information (topics, categories, goals)
-    ↓
-Generate vector embeddings
-    ↓
-Store in memory database
-    ↓
-When generating new insights:
-    ↓
-Search for relevant memories
-    ↓
-Include memory context in AI prompt
-    ↓
-Generate personalized, contextual response
-```
-
-## API Keys and Services
-
-### OpenAI
-- **Purpose**: AI text generation and vector embeddings
-- **Models Used**: 
-  - `gpt-3.5-turbo` for insights and conversations
-  - `text-embedding-ada-002` for memory embeddings
-- **Cost**: ~$0.002 per 1K tokens for GPT-3.5, ~$0.0001 per 1K tokens for embeddings
-
-### Supabase (Optional)
-- **Purpose**: Cloud storage and vector database
-- **Features**: 
-  - Document and insight storage
-  - Vector similarity search
-  - Real-time sync
-- **Extensions**: pgvector for vector operations
-
-## Development
 
 ### Project Structure
 ```
-src/
-├── components/          # React components
-│   ├── Editor.tsx      # Rich text editor
-│   ├── Sidebar.tsx     # Document navigation
-│   └── InsightsPanel.tsx # AI insights interface
-├── services/           # External service integrations
-│   ├── ai.ts          # OpenAI integration
-│   ├── memory.ts      # Memory system and RAG
-│   └── supabase.ts    # Database operations
-├── types/             # TypeScript type definitions
-├── utils/             # Utility functions
-└── App.tsx           # Main application component
+success-diary/
+├── src/
+│   ├── components/          # React components
+│   ├── services/           # API and external service integrations
+│   ├── types/              # TypeScript type definitions
+│   ├── utils/              # Utility functions
+│   ├── App.tsx            # Main application component
+│   └── main.tsx           # Application entry point
+├── public/                # Static assets
+├── dist/                  # Build output
+└── Configuration files
 ```
 
-### Key Features Implementation
+## 📁 Component Architecture
 
-#### Memory System
-- **Vector Embeddings**: Automatic generation and storage of semantic embeddings
-- **Similarity Search**: Fast retrieval of relevant memories using cosine similarity
-- **Context Integration**: Seamless integration with AI prompts for personalized responses
-- **Fallback Mechanisms**: Text-based search when vector search isn't available
+### Core Components
 
-#### RAG Implementation
-- **Memory Retrieval**: Smart search for relevant past experiences
-- **Context Enhancement**: AI prompts include memory context for better responses
-- **Personal References**: AI naturally references past entries in conversations
-- **Pattern Recognition**: Identifies recurring themes and personal growth areas
+#### `App.tsx` - Main Application Component
+**Location**: `src/App.tsx`
+**Purpose**: Main application orchestrator and state management
 
-### Available Scripts
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
+**Key Responsibilities**:
+- User authentication state management
+- Document CRUD operations
+- AI insight generation coordination
+- Memory context management
+- Local/Supabase data synchronization
 
-## Contributing
+**Key State Variables**:
+```typescript
+const [documents, setDocuments] = useState<Document[]>([]);
+const [currentDocument, setCurrentDocument] = useState<Document | null>(null);
+const [insights, setInsights] = useState<Insight[]>([]);
+const [user, setUser] = useState<any>(null);
+const [memoryContext, setMemoryContext] = useState<MemoryContext | undefined>();
+```
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+**Key Functions**:
+- `handleGoogleLogin()` - Initiates Google OAuth flow
+- `handleLogout()` - Signs out user and clears state
+- `handleSaveDocument()` - Saves document to local storage and Supabase
+- `handleGenerateInsight()` - Generates AI insights for current document
+- `loadMemoryContext()` - Loads relevant past entries for AI context
 
-## License
+#### `Editor.tsx` - Rich Text Editor
+**Location**: `src/components/Editor.tsx`
+**Purpose**: Main text editing interface with formatting tools
+
+**Features**:
+- Real-time markdown-style formatting
+- Template system integration
+- Auto-save functionality
+- Preview mode for non-authenticated users
+- Authentication UI in toolbar
+
+**Key Props**:
+```typescript
+interface EditorProps {
+  document: Document | null;
+  onSave: (document: Document) => void;
+  onUpdate: (document: Document) => void;
+  isPreviewMode?: boolean;
+  user?: any;
+  onLogout?: () => void;
+  onLogin?: () => void;
+}
+```
+
+**Key Functions**:
+- `handleSave()` - Saves current document with sanitization
+- `insertText()` - Inserts formatted text at cursor position
+- `handleSelectTemplate()` - Applies template to current document
+
+#### `Sidebar.tsx` - Document Navigation
+**Location**: `src/components/Sidebar.tsx`
+**Purpose**: Document list and navigation interface
+
+**Features**:
+- Document list with search functionality
+- Document preview snippets
+- Create new document button
+- Authentication buttons (login/logout)
+- Delete document functionality
+
+**Key Props**:
+```typescript
+interface SidebarProps {
+  documents: Document[];
+  currentDocument: Document | null;
+  onNewDocument: () => void;
+  onSelectDocument: (document: Document) => void;
+  onDeleteDocument: (documentId: string) => void;
+  isPreviewMode?: boolean;
+  user?: any;
+  onLogout?: () => void;
+  onLogin?: () => void;
+}
+```
+
+#### `InsightsPanel.tsx` - AI Insights Interface
+**Location**: `src/components/InsightsPanel.tsx`
+**Purpose**: AI-powered insights generation and display
+
+**Features**:
+- Single-turn insight generation
+- Multi-turn conversation insights
+- Insight export (JSON/Text)
+- Insight sharing
+- Memory context display
+- Resizable panel
+
+**Key Props**:
+```typescript
+interface InsightsPanelProps {
+  documentId: string;
+  documentContent: string;
+  insights: Insight[];
+  onGenerateInsight: (request: InsightRequest) => Promise<void>;
+  onDeleteInsight: (insightId: string) => void;
+  onSyncInsights: () => Promise<void>;
+  isLoading: boolean;
+  memoryContext?: MemoryContext;
+}
+```
+
+#### `FishTank.tsx` - Interactive Animation
+**Location**: `src/components/FishTank.tsx`
+**Purpose**: Delightful UI animation element
+
+**Features**:
+- Expandable fish tank animation
+- Interactive fish movement
+- Bubble generation
+- Click interactions
+- Performance-optimized animations
+
+## 🔧 Services Architecture
+
+### Authentication Service (`supabase.ts`)
+**Location**: `src/services/supabase.ts`
+**Purpose**: Handles all Supabase interactions
+
+**Key Functions**:
+```typescript
+// Authentication
+export const signInWithGoogle = async () => Promise<AuthResponse>
+export const signOut = async () => Promise<{ data: null, error: any }>
+export const handleAuthCallback = async () => Promise<{ data: any, error: any }>
+
+// Document Operations
+export const saveDocumentToSupabase = async (document: Document) => Promise<void>
+export const loadDocumentsFromSupabase = async () => Promise<Document[]>
+export const deleteDocumentFromSupabase = async (documentId: string) => Promise<void>
+
+// Insight Operations
+export const saveInsightToSupabase = async (insight: Insight) => Promise<void>
+export const loadInsightsFromSupabase = async (documentId: string) => Promise<Insight[]>
+export const deleteInsightFromSupabase = async (insightId: string) => Promise<void>
+```
+
+### AI Service (`ai.ts`)
+**Location**: `src/services/ai.ts`
+**Purpose**: OpenAI GPT-4 integration for insight generation
+
+**Key Functions**:
+```typescript
+export const generateInsight = async (request: InsightRequest) => Promise<Insight>
+export const generateEnhancedInsight = async (request: EnhancedInsightRequest) => Promise<Insight>
+```
+
+**AI Prompt Engineering**:
+- Context-aware prompts using memory system
+- Structured output for consistent insights
+- Multi-turn conversation support
+- Error handling and fallbacks
+
+### Memory Service (`memory.ts`)
+**Location**: `src/services/memory.ts`
+**Purpose**: Vector-based memory system for AI context
+
+**Key Functions**:
+```typescript
+export const storeMemory = async (memory: Memory) => Promise<string>
+export const searchMemories = async (query: string, userId: string) => Promise<MemorySearchResult[]>
+export const getMemoryContext = async (currentContent: string, userId: string) => Promise<MemoryContext>
+export const extractMemoryFromContent = async (content: string, userId: string) => Promise<string>
+```
+
+**Memory System Features**:
+- Semantic search using embeddings
+- Context summarization
+- Suggestion generation
+- Local storage fallback
+
+### Template Service (`templates.ts`)
+**Location**: `src/services/templates.ts`
+**Purpose**: Pre-built document templates
+
+**Key Functions**:
+```typescript
+export const getTemplates = (): Template[]
+export const getTemplateById = (id: string): Template | undefined
+```
+
+## 📊 Data Models
+
+### Core Types (`types/index.ts`)
+
+```typescript
+// Document Model
+interface Document {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  tags?: string[];
+  insights?: Insight[];
+}
+
+// Insight Model
+interface Insight {
+  id: string;
+  documentId: string;
+  type: 'single' | 'multi';
+  content: string;
+  createdAt: Date;
+  conversationHistory?: any[];
+  metadata?: any;
+}
+
+// Memory Model
+interface Memory {
+  id: string;
+  userId: string;
+  content: string;
+  tags: string[];
+  context: string;
+  createdAt: Date;
+  embedding?: number[];
+}
+
+// AI Request Models
+interface InsightRequest {
+  documentId: string;
+  type: 'single' | 'multi';
+  prompt?: string;
+  conversationHistory?: any[];
+}
+
+interface EnhancedInsightRequest extends InsightRequest {
+  memoryContext?: MemoryContext;
+  previousInsights?: Insight[];
+}
+```
+
+## 🔐 Authentication Flow
+
+### OAuth Configuration
+1. **Google OAuth Console**: Configure authorized origins and redirect URIs
+2. **Supabase Auth Settings**: Set up site URL and redirect URLs
+3. **Environment Variables**: Configure Supabase URL and keys
+
+### Authentication States
+- **Unauthenticated**: Preview mode with sample documents
+- **Authenticated**: Full functionality with data persistence
+
+## 🚀 Deployment
+
+### Vercel Configuration
+- **Framework**: Vite
+- **Build Command**: `npm run build`
+- **Node Version**: 18+
+- **Environment Variables**: Required for Supabase and OpenAI
+
+### Environment Variables
+```bash
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_OPENAI_API_KEY=your_openai_api_key
+VITE_PINECONE_API_KEY=your_pinecone_api_key
+VITE_PINECONE_ENVIRONMENT=your_pinecone_environment
+```
+
+## 🛠️ Development Guidelines
+
+### Adding New Features
+
+#### 1. Component Development
+- Follow existing component patterns in `src/components/`
+- Use TypeScript interfaces for props
+- Implement proper error handling
+- Add loading states where appropriate
+
+#### 2. Service Integration
+- Add new services to `src/services/`
+- Follow existing error handling patterns
+- Implement local storage fallbacks
+- Add proper TypeScript types
+
+#### 3. State Management
+- Use React hooks for local state
+- Follow existing patterns in `App.tsx`
+- Consider data persistence requirements
+- Implement proper cleanup
+
+### Code Quality Standards
+- **TypeScript**: Strict mode enabled
+- **ESLint**: Configured for React and TypeScript
+- **Prettier**: Consistent code formatting
+- **Error Handling**: Comprehensive error boundaries
+- **Performance**: Optimized re-renders and animations
+
+### Testing Strategy
+- **Unit Tests**: Component and utility function testing
+- **Integration Tests**: Service and API testing
+- **E2E Tests**: User flow testing
+- **Performance Tests**: Animation and rendering optimization
+
+## 🔍 Debugging Guide
+
+### Common Issues
+
+#### Authentication Problems
+1. Check Google OAuth configuration
+2. Verify Supabase auth settings
+3. Check environment variables
+4. Review browser console for errors
+
+#### AI Insights Not Working
+1. Verify OpenAI API key
+2. Check Pinecone configuration
+3. Review memory service logs
+4. Test with simple prompts
+
+#### Data Sync Issues
+1. Check Supabase connection
+2. Verify local storage permissions
+3. Review network connectivity
+4. Check data validation
+
+### Debug Tools
+- **Browser DevTools**: Network and console monitoring
+- **Supabase Dashboard**: Real-time database monitoring
+- **OpenAI API**: Usage and error monitoring
+- **Vercel Analytics**: Performance monitoring
+
+## 📈 Performance Optimization
+
+### Current Optimizations
+- **Code Splitting**: Vendor and utility chunks
+- **Lazy Loading**: Component-level code splitting
+- **Memoization**: React.memo for expensive components
+- **Animation Optimization**: RequestAnimationFrame usage
+- **Bundle Optimization**: Tree shaking and minification
+
+### Future Optimizations
+- **Service Worker**: Offline functionality
+- **Virtual Scrolling**: Large document lists
+- **Image Optimization**: Asset compression
+- **Caching Strategy**: Intelligent data caching
+
+## 🤝 Contributing
+
+### Development Setup
+1. Clone repository
+2. Install dependencies: `npm install`
+3. Set up environment variables
+4. Start development server: `npm run dev`
+5. Build for production: `npm run build`
+
+### Code Review Process
+1. Create feature branch
+2. Implement changes with tests
+3. Update documentation
+4. Submit pull request
+5. Code review and approval
+
+## 📄 License
 
 MIT License - see LICENSE file for details
 
-## Support
-
-For issues and questions:
-1. Check the existing issues
-2. Create a new issue with detailed information
-3. Include your environment details and error messages
-
 ---
 
-**Note**: This application stores your personal diary entries and memories. While it uses local storage by default, consider your privacy needs when using cloud sync features. 
+**For AI Coders**: This documentation provides a comprehensive overview of the Success Diary application architecture. Key areas to focus on when making changes:
+
+1. **State Management**: All main state is managed in `App.tsx`
+2. **Service Layer**: External integrations are in `src/services/`
+3. **Component Structure**: Follow existing patterns in `src/components/`
+4. **Type Safety**: All interfaces are defined in `src/types/`
+5. **Error Handling**: Implement comprehensive error handling
+6. **Performance**: Consider impact on animations and user experience 

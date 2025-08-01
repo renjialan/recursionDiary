@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import InsightsPanel from './components/InsightsPanel';
 import FishTank from './components/FishTank';
+import AuthCallback from './components/AuthCallback';
 import { Document, Insight, InsightRequest, EnhancedInsightRequest } from './types';
 import { 
   loadDocuments, 
@@ -30,6 +31,9 @@ const App: React.FC = () => {
   
   // Auth state
   const [user, setUser] = React.useState<any>(null);
+  
+  // Route detection
+  const isAuthCallback = window.location.pathname === '/auth/callback';
 
   // Initialize or load user ID
   React.useEffect(() => {
@@ -361,6 +365,11 @@ const App: React.FC = () => {
       insights.forEach(insight => saveInsightToLocal(insight));
     }
   }, [insights, currentDocument]);
+
+  // Show auth callback component if we're on the callback route
+  if (isAuthCallback) {
+    return <AuthCallback />;
+  }
 
   return (
     <div className="h-screen flex bg-gray-50">
