@@ -50,8 +50,22 @@ export const handleAuthCallback = async () => {
 };
 
 export const signOut = async () => {
-  if (!supabase) return;
-  return await supabase.auth.signOut();
+  if (!supabase) {
+    console.warn('Supabase not configured');
+    return { error: 'Supabase not configured' };
+  }
+  
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Sign out error:', error);
+      return { error };
+    }
+    return { data: null, error: null };
+  } catch (error) {
+    console.error('Error during sign out:', error);
+    return { error };
+  }
 };
 
 export const getCurrentUser = () => {

@@ -71,7 +71,13 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await signOut();
+      const { error } = await signOut();
+      if (error) {
+        console.error('Logout error:', error);
+        alert('Failed to sign out. Please try again.');
+        return;
+      }
+      
       // Clear local state
       setUser(null);
       setDocuments([]);
