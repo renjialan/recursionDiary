@@ -11,9 +11,10 @@ interface EditorProps {
   isPreviewMode?: boolean;
   user?: any;
   onLogout?: () => void;
+  onLogin?: () => void;
 }
 
-const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMode = false, user, onLogout }) => {
+const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMode = false, user, onLogout, onLogin }) => {
   const [title, setTitle] = React.useState('');
   const [content, setContent] = React.useState('');
   const [isTemplateModalOpen, setIsTemplateModalOpen] = React.useState(false);
@@ -296,8 +297,9 @@ const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMo
               {isPreviewMode ? "Preview" : "Save"}
             </button>
             
-            {/* User Profile Button */}
-            {user && (
+            {/* Authentication UI */}
+            {user ? (
+              /* User Profile Button for authenticated users */
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
@@ -335,6 +337,15 @@ const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMo
                   </div>
                 )}
               </div>
+            ) : (
+              /* Sign In Button for unauthenticated users */
+              <button
+                onClick={onLogin}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+                title="Sign in with Google"
+              >
+                Sign In
+              </button>
             )}
           </div>
         </div>

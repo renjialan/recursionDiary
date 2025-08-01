@@ -72,7 +72,6 @@ const App: React.FC = () => {
   const handleLogout = async () => {
     try {
       await signOut();
-      setShowUserMenu(false); // Close menu after logout
       // Clear local state
       setUser(null);
       setDocuments([]);
@@ -360,22 +359,6 @@ const App: React.FC = () => {
   return (
     <div className="h-screen flex bg-gray-50">
       <div className="flex-1 flex">
-        
-        {/* Simple sign-in prompt for non-authenticated users */}
-        {!user && (
-          <div className="fixed top-20 right-6 z-40">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 max-w-[280px]">
-              <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">Sign in to save your work</p>
-              <button 
-                onClick={handleGoogleLogin}
-                className="w-full bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-black px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                Sign In
-              </button>
-            </div>
-          </div>
-        )}
-        
         <Sidebar
           documents={documents}
           currentDocument={currentDocument}
@@ -392,6 +375,7 @@ const App: React.FC = () => {
             isPreviewMode={!user}
             user={user}
             onLogout={handleLogout}
+            onLogin={handleGoogleLogin}
           />
           {currentDocument && (
             <div className="flex items-center">
