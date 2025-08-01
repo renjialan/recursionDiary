@@ -9,12 +9,15 @@ interface EditorProps {
   onSave: (document: Document) => void;
   onUpdate: (document: Document) => void;
   isPreviewMode?: boolean;
+  user?: any;
+  onLogout?: () => void;
 }
 
-const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMode = false }) => {
+const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMode = false, user, onLogout }) => {
   const [title, setTitle] = React.useState('');
   const [content, setContent] = React.useState('');
   const [isTemplateModalOpen, setIsTemplateModalOpen] = React.useState(false);
+  const [showUserMenu, setShowUserMenu] = React.useState(false);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   React.useEffect(() => {
@@ -26,6 +29,20 @@ const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMo
       setContent('');
     }
   }, [document]);
+
+  // Close user menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showUserMenu) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isPreviewMode) return;
@@ -264,19 +281,62 @@ const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMo
               <Layout size={16} />
             </button>
           </div>
-          <button
-            onClick={handleSave}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              isPreviewMode
-                ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                : "bg-gray-900 dark:bg-gray-100 text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
-            }`}
-            disabled={isPreviewMode}
-            title={isPreviewMode ? "Sign in to save documents" : "Save"}
-          >
-            <Save size={16} />
-            {isPreviewMode ? "Preview" : "Save"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSave}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                isPreviewMode
+                  ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                  : "bg-gray-900 dark:bg-gray-100 text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+              }`}
+              disabled={isPreviewMode}
+              title={isPreviewMode ? "Sign in to save documents" : "Save"}
+            >
+              <Save size={16} />
+              {isPreviewMode ? "Preview" : "Save"}
+            </button>
+            
+            {/* User Profile Button */}
+            {user && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="w-10 h-10 bg-gray-900 dark:bg-gray-100 rounded-full flex items-center justify-center text-white dark:text-black font-medium text-sm shadow-sm hover:shadow-md transition-all duration-200"
+                  title="User menu"
+                >
+                  {user.email?.charAt(0).toUpperCase()}
+                </button>
+                
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-4 z-50">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-10 h-10 bg-gray-900 dark:bg-gray-100 rounded-full flex items-center justify-center text-white dark:text-black font-medium text-sm">
+                        {user.email?.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-gray-100 text-sm">
+                          {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                        </div>
+                        <div className="text-gray-500 dark:text-gray-400 text-xs">{user.email}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t border-gray-100 dark:border-gray-700 pt-4">
+                      <button 
+                        onClick={() => {
+                          onLogout?.();
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
