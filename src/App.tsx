@@ -5,6 +5,7 @@ import Editor from './components/Editor';
 import InsightsPanel from './components/InsightsPanel';
 import FishTank from './components/FishTank';
 import AuthCallback from './components/AuthCallback';
+import DebugPanel from './components/DebugPanel';
 import { Document, Insight, InsightRequest, EnhancedInsightRequest } from './types';
 import { 
   loadDocuments, 
@@ -20,6 +21,8 @@ import { getMemoryContext } from './services/memory';
 import { MemoryContext } from './types';
 
 const App: React.FC = () => {
+  console.log('🚀 App component starting to render...');
+  
   const [documents, setDocuments] = React.useState<Document[]>([]);
   const [currentDocument, setCurrentDocument] = React.useState<Document | null>(null);
   const [insights, setInsights] = React.useState<Insight[]>([]);
@@ -34,6 +37,8 @@ const App: React.FC = () => {
   
   // Route detection
   const isAuthCallback = window.location.pathname === '/auth/callback';
+  
+  console.log('✅ App component state initialized successfully');
 
   // Initialize or load user ID
   React.useEffect(() => {
@@ -47,48 +52,95 @@ const App: React.FC = () => {
 
   // Auth testing - check current user
   React.useEffect(() => {
+    console.log('🔐 Auth Setup Starting:');
+    console.log('  - Supabase available:', !!supabase);
+    
     if (supabase) {
+      console.log('✅ Setting up auth listeners...');
+      
       // Handle OAuth callback on page load
+      console.log('  - Handling OAuth callback...');
       handleAuthCallback();
       
       // Check current session
+      console.log('  - Checking current session...');
       supabase.auth.getSession().then(({ data: { session } }: any) => {
+        console.log('📋 Initial session check:');
+        console.log('    - Session exists:', !!session);
+        console.log('    - User logged in:', !!session?.user);
+        if (session?.user) {
+          console.log('    - User email:', session.user.email);
+          console.log('    - User ID:', session.user.id);
+        }
         setUser(session?.user ?? null);
       });
 
       // Listen for auth changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      console.log('  - Setting up auth state listener...');
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
+        console.log('🔄 Auth state change detected:');
+        console.log('    - Event:', event);
+        console.log('    - User logged in:', !!session?.user);
+        if (session?.user) {
+          console.log('    - User email:', session.user.email);
+        }
         setUser(session?.user ?? null);
       });
 
-      return () => subscription.unsubscribe();
+      return () => {
+        console.log('🧹 Cleaning up auth subscription');
+        subscription.unsubscribe();
+      };
+    } else {
+      console.log('❌ Supabase not available for auth setup');
     }
   }, []);
 
   // Login functions
   const handleGoogleLogin = async () => {
-    const { error } = await signInWithGoogle();
-    if (error) {
+    console.log('🔐 handleGoogleLogin called');
+    console.log('  - Current user state:', !!user);
+    
+    try {
+      const { error } = await signInWithGoogle();
+      console.log('📤 signInWithGoogle result:', { error });
+      
+      if (error) {
+        console.error('❌ Login error:', error);
+        alert('Login failed. Please try again.');
+      } else {
+        console.log('✅ Login initiated successfully');
+      }
+    } catch (error) {
+      console.error('❌ Login error:', error);
       alert('Login failed. Please try again.');
     }
   };
 
   const handleLogout = async () => {
+    console.log('🚪 handleLogout called');
+    console.log('  - Current user state:', !!user);
+    if (user) {
+      console.log('  - User email:', user.email);
+      console.log('  - User ID:', user.id);
+    }
+    
     try {
+      console.log('📞 Calling signOut function...');
       const { error } = await signOut();
+      console.log('📤 signOut result:', { error });
+      
       if (error) {
-        console.error('Logout error:', error);
+        console.error('❌ Logout error:', error);
         alert('Failed to sign out. Please try again.');
         return;
       }
       
-      // Clear local state
-      setUser(null);
-      setDocuments([]);
-      setCurrentDocument(null);
-      setInsights([]);
+      // Note: The signOut function will handle page reload
+      // No need to manually clear state as the page will refresh
+      console.log('✅ Logout completed successfully - page will reload');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('❌ Logout error:', error);
       alert('Failed to sign out. Please try again.');
     }
   };
@@ -368,8 +420,15 @@ const App: React.FC = () => {
 
   // Show auth callback component if we're on the callback route
   if (isAuthCallback) {
+    console.log('🔄 Rendering AuthCallback component');
     return <AuthCallback />;
   }
+
+  console.log('🎨 Rendering main App component');
+  console.log('  - User:', !!user);
+  console.log('  - Documents count:', documents.length);
+  console.log('  - Current document:', !!currentDocument);
+  console.log('  - Supabase available:', !!supabase);
 
   return (
     <div className="h-screen flex bg-gray-50">
@@ -427,6 +486,11 @@ const App: React.FC = () => {
       
         {/* Fish Tank */}
         <FishTank />
+        <DebugPanel 
+          user={user} 
+          onLogin={handleGoogleLogin} 
+          onLogout={handleLogout} 
+        />
       </div>
     </div>
   );

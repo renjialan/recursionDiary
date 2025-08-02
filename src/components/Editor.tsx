@@ -33,16 +33,32 @@ const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMo
 
   // Close user menu when clicking outside
   React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (_event: MouseEvent) => {
       if (showUserMenu) {
         setShowUserMenu(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    // Check if document exists and has addEventListener method
+    if (typeof document !== 'undefined' && document) {
+      try {
+        // @ts-ignore - document is available in browser environment
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+          try {
+            // Check again before removing to be safe
+            if (typeof document !== 'undefined' && document) {
+              // @ts-ignore - document is available in browser environment
+              document.removeEventListener('mousedown', handleClickOutside);
+            }
+          } catch (error) {
+            console.warn('Error removing event listener:', error);
+          }
+        };
+      } catch (error) {
+        console.warn('Error adding event listener:', error);
+      }
+    }
   }, [showUserMenu]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,20 +133,37 @@ const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMo
     }
   };
 
+  // Convert markdown to plain text for template insertion
+  const convertMarkdownToPlainText = (markdown: string): string => {
+    return markdown
+      .replace(/^#+\s*/gm, '') // Remove headers (#, ##, ###)
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold (**text**)
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic (*text*)
+      .replace(/`(.*?)`/g, '$1') // Remove inline code (`text`)
+      .replace(/~~(.*?)~~/g, '$1') // Remove strikethrough (~~text~~)
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links [text](url) to text
+      .replace(/^\s*[-*+]\s+/gm, '• ') // Convert markdown lists to bullet points
+      .replace(/^\s*\d+\.\s+/gm, '') // Remove numbered list markers
+      .replace(/^\s*>\s+/gm, '') // Remove blockquote markers
+      .replace(/\n{3,}/g, '\n\n') // Normalize multiple newlines
+      .trim();
+  };
+
   const handleSelectTemplate = (template: Template) => {
     try {
       const isEmptyDocument = !content.trim() && !title.trim();
+      const plainTextContent = convertMarkdownToPlainText(template.content);
       
       if (isEmptyDocument) {
         // Replace entire content for empty documents
-        setContent(template.content);
+        setContent(plainTextContent);
         setTitle(template.name);
         
         if (document) {
           onUpdate({
             ...document,
             title: template.name,
-            content: template.content,
+            content: plainTextContent,
             updatedAt: new Date(),
           });
         }
@@ -141,7 +174,7 @@ const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMo
           const start = textarea.selectionStart;
           const end = textarea.selectionEnd;
           const prefix = start > 0 ? '\n\n' : '';
-          const templateContent = prefix + template.content;
+          const templateContent = prefix + plainTextContent;
           const newContent = content.substring(0, start) + templateContent + content.substring(end);
           setContent(newContent);
           
@@ -166,7 +199,8 @@ const Editor: React.FC<EditorProps> = ({ document, onSave, onUpdate, isPreviewMo
     } catch (error) {
       console.error('Failed to insert template:', error);
       // Fallback: just append template to end of content
-      setContent(prev => prev + '\n\n' + template.content);
+      const plainTextContent = convertMarkdownToPlainText(template.content);
+      setContent(prev => prev + '\n\n' + plainTextContent);
     }
   };
 

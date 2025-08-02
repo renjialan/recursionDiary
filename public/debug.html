@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Success Diary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 Debug Page - Success Diary</h1>
+        
+        <div id="status"></div>
+        
+        <h2>Environment Check</h2>
+        <div id="env-check"></div>
+        
+        <h2>Console Logs</h2>
+        <div id="console-logs"></div>
+        
+        <h2>Test React App</h2>
+        <p>If the React app is working, you should see it below:</p>
+        <div id="root"></div>
+    </div>
+
+    <script>
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        const logs = [];
+        
+        function addLog(type, ...args) {
+            const timestamp = new Date().toISOString();
+            logs.push({ type, args, timestamp });
+            updateLogs();
+        }
+        
+        console.log = (...args) => {
+            originalLog.apply(console, args);
+            addLog('log', ...args);
+        };
+        
+        console.error = (...args) => {
+            originalError.apply(console, args);
+            addLog('error', ...args);
+        };
+        
+        console.warn = (...args) => {
+            originalWarn.apply(console, args);
+            addLog('warn', ...args);
+        };
+        
+        function updateLogs() {
+            const logsDiv = document.getElementById('console-logs');
+            logsDiv.innerHTML = logs.map(log => 
+                `<div class="status ${log.type === 'error' ? 'error' : log.type === 'warn' ? 'warning' : 'success'}">
+                    <strong>${log.timestamp}</strong> [${log.type.toUpperCase()}]: ${log.args.map(arg => 
+                        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+                    ).join(' ')}
+                </div>`
+            ).join('');
+        }
+        
+        // Check environment
+        function checkEnvironment() {
+            const envDiv = document.getElementById('env-check');
+            const checks = [
+                { name: 'Window Object', value: typeof window !== 'undefined' },
+                { name: 'Document Object', value: typeof document !== 'undefined' },
+                { name: 'Console Object', value: typeof console !== 'undefined' },
+                { name: 'LocalStorage', value: typeof localStorage !== 'undefined' },
+                { name: 'SessionStorage', value: typeof sessionStorage !== 'undefined' },
+                { name: 'Fetch API', value: typeof fetch !== 'undefined' },
+            ];
+            
+            envDiv.innerHTML = checks.map(check => 
+                `<div class="status ${check.value ? 'success' : 'error'}">
+                    ${check.name}: ${check.value ? '✅ Available' : '❌ Not Available'}
+                </div>`
+            ).join('');
+        }
+        
+        // Check for errors
+        window.addEventListener('error', (event) => {
+            addLog('error', 'Global error:', event.error);
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+            addLog('error', 'Unhandled promise rejection:', event.reason);
+        });
+        
+        // Initialize
+        checkEnvironment();
+        addLog('log', 'Debug page loaded successfully');
+        
+        // Test if React app loads
+        setTimeout(() => {
+            const root = document.getElementById('root');
+            if (root && root.children.length === 0) {
+                addLog('warn', 'React app root is empty - app may not have loaded');
+            } else if (root) {
+                addLog('log', 'React app appears to be loaded');
+            }
+        }, 2000);
+    </script>
+</body>
+</html> 

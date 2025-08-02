@@ -7,34 +7,45 @@ const AuthCallback: React.FC = () => {
 
   useEffect(() => {
     const processAuthCallback = async () => {
+      console.log('🔄 AuthCallback: Processing OAuth callback...');
+      console.log('  - Current URL:', window.location.href);
+      console.log('  - URL parameters:', window.location.search);
+      
       try {
-        console.log('Processing auth callback...');
+        console.log('📞 Calling handleAuthCallback...');
         
         // Handle the OAuth callback
         const result = await handleAuthCallback();
+        console.log('📤 handleAuthCallback result:', result);
         
         if (result?.error) {
-          console.error('Auth callback error:', result.error);
+          console.error('❌ Auth callback error:', result.error);
           setError('Authentication failed. Please try again.');
           setStatus('error');
           return;
         }
 
+        console.log('🔍 Checking for session...');
         // Check if we have a session
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('📋 Session check result:', {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userEmail: session?.user?.email
+        });
         
         if (session) {
-          console.log('Authentication successful, redirecting...');
+          console.log('✅ Authentication successful, redirecting to main app...');
           setStatus('success');
           // Redirect to the main app
           window.location.href = '/';
         } else {
-          console.error('No session found after callback');
+          console.error('❌ No session found after callback');
           setError('Authentication failed. No session found.');
           setStatus('error');
         }
       } catch (err) {
-        console.error('Error processing auth callback:', err);
+        console.error('❌ Error processing auth callback:', err);
         setError('Authentication failed. Please try again.');
         setStatus('error');
       }
